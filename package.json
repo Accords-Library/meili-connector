@@ -1,0 +1,19 @@
+{
+  "name": "meili.accords-library.com",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/index.ts",
+    "fetch-submodules": "cd src/shared && git pull && cd ../..",
+    "tsc": "tsc --noEmit",
+    "precommit": "npm run fetch-submodules && npm run tsc"
+  },
+  "dependencies": {
+    "meilisearch": "^0.41.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  }
+}
