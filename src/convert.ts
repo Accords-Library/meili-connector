@@ -1,8 +1,5 @@
 import { payload } from "src/services";
-import type {
-  MeiliDocument,
-  MeiliDocumentRequest,
-} from "src/shared/meilisearch/types";
+import type { MeiliDocument } from "src/shared/meilisearch/types";
 import { Collections } from "src/shared/payload/constants";
 import type {
   EndpointAudio,
@@ -40,7 +37,6 @@ const convertPageToDocument = ({
       }${formatRichTextContentToString(content)}`,
       updatedAt: Date.parse(data.updatedAt),
       type: Collections.Pages,
-      slug: data.slug,
       endpointCalled,
       data,
     })
@@ -61,7 +57,6 @@ const convertCollectibleToDocument = ({
         : {}),
       updatedAt: Date.parse(data.updatedAt),
       type: Collections.Collectibles,
-      slug: data.slug,
       endpointCalled,
       data,
     })
@@ -80,7 +75,6 @@ const convertFolderToDocument = ({
       ? { description: formatRichTextContentToString(description) }
       : {}),
     type: Collections.Folders,
-    slug: data.slug,
     endpointCalled,
     data,
   }));
@@ -99,7 +93,6 @@ const convertAudioToDocument = ({
       : {}),
     updatedAt: Date.parse(data.updatedAt),
     type: Collections.Audios,
-    id: data.id,
     endpointCalled,
     data,
   }));
@@ -120,7 +113,6 @@ const convertImageToDocument = ({
           : {}),
         updatedAt: Date.parse(data.updatedAt),
         type: Collections.Images,
-        id: data.id,
         endpointCalled,
         data,
       })
@@ -134,7 +126,6 @@ const convertImageToDocument = ({
         title: data.filename,
         updatedAt: Date.parse(data.updatedAt),
         type: Collections.Images,
-        id: data.id,
         endpointCalled,
         data,
       },
@@ -156,7 +147,6 @@ const convertVideoToDocument = ({
       : {}),
     updatedAt: Date.parse(data.updatedAt),
     type: Collections.Videos,
-    id: data.id,
     endpointCalled,
     data,
   }));
@@ -175,7 +165,6 @@ const convertRecorderToDocument = ({
         ? { description: formatRichTextContentToString(biography) }
         : {}),
       type: Collections.Recorders,
-      id: data.id,
       endpointCalled,
       data,
     }));
@@ -187,7 +176,6 @@ const convertRecorderToDocument = ({
         languages: [],
         title: data.username,
         type: Collections.Recorders,
-        id: data.id,
         endpointCalled,
         data,
       },
@@ -211,7 +199,6 @@ const convertFileToDocument = ({
           : {}),
         updatedAt: Date.parse(data.updatedAt),
         type: Collections.Files,
-        id: data.id,
         endpointCalled,
         data,
       })
@@ -225,7 +212,6 @@ const convertFileToDocument = ({
         title: data.filename,
         updatedAt: Date.parse(data.updatedAt),
         type: Collections.Files,
-        id: data.id,
         endpointCalled,
         data,
       },
@@ -252,81 +238,48 @@ const convertChronologyEventToDocument = ({
             }
           : {}),
         type: Collections.ChronologyEvents,
-        id: data.id,
         endpointCalled,
         data: { date: data.date, event },
       })
     )
   );
 
-export const getMeiliDocumentsFromRequest = async (
-  request: MeiliDocumentRequest
+export const convertEndpointChangeToMeiliDocuments = async (
+  request: EndpointChange
 ): Promise<MeiliDocument[]> => {
   switch (request.type) {
-    case Collections.Audios:
-      return convertAudioToDocument(await payload.getAudioByID(request.id));
+    case SDKEndpointNames.getFolder:
+      return convertFolderToDocument(await payload.getFolder(request.slug));
 
-    case Collections.ChronologyEvents:
-      return convertChronologyEventToDocument(
-        await payload.getChronologyEventByID(request.id)
-      );
+    case SDKEndpointNames.getPage:
+      return convertPageToDocument(await payload.getPage(request.slug));
 
-    case Collections.Collectibles:
+    case SDKEndpointNames.getCollectible:
       return convertCollectibleToDocument(
         await payload.getCollectible(request.slug)
       );
 
-    case Collections.Files:
-      return convertFileToDocument(await payload.getFileByID(request.id));
+    case SDKEndpointNames.getChronologyEventByID:
+      return convertChronologyEventToDocument(
+        await payload.getChronologyEventByID(request.id)
+      );
 
-    case Collections.Folders:
-      return convertFolderToDocument(await payload.getFolder(request.slug));
-
-    case Collections.Images:
+    case SDKEndpointNames.getImageByID:
       return convertImageToDocument(await payload.getImageByID(request.id));
 
-    case Collections.Pages:
-      return convertPageToDocument(await payload.getPage(request.slug));
+    case SDKEndpointNames.getAudioByID:
+      return convertAudioToDocument(await payload.getAudioByID(request.id));
 
-    case Collections.Recorders:
+    case SDKEndpointNames.getVideoByID:
+      return convertVideoToDocument(await payload.getVideoByID(request.id));
+
+    case SDKEndpointNames.getFileByID:
+      return convertFileToDocument(await payload.getFileByID(request.id));
+
+    case SDKEndpointNames.getRecorderByID:
       return convertRecorderToDocument(
         await payload.getRecorderByID(request.id)
       );
-    case Collections.Videos:
-      return convertVideoToDocument(await payload.getVideoByID(request.id));
-  }
-};
-
-export const convertChangeToMeiliDocumentRequest = (
-  change: EndpointChange
-): MeiliDocumentRequest | undefined => {
-  switch (change.type) {
-    case SDKEndpointNames.getFolder:
-      return { type: Collections.Folders, slug: change.slug };
-
-    case SDKEndpointNames.getPage:
-      return { type: Collections.Pages, slug: change.slug };
-
-    case SDKEndpointNames.getCollectible:
-      return { type: Collections.Pages, slug: change.slug };
-
-    case SDKEndpointNames.getChronologyEventByID:
-      return { type: Collections.ChronologyEvents, id: change.id };
-
-    case SDKEndpointNames.getImageByID:
-      return { type: Collections.Images, id: change.id };
-
-    case SDKEndpointNames.getAudioByID:
-      return { type: Collections.Images, id: change.id };
-
-    case SDKEndpointNames.getVideoByID:
-      return { type: Collections.Images, id: change.id };
-
-    case SDKEndpointNames.getFileByID:
-      return { type: Collections.Images, id: change.id };
-
-    case SDKEndpointNames.getRecorderByID:
-      return { type: Collections.Images, id: change.id };
 
     case SDKEndpointNames.getWebsiteConfig:
     case SDKEndpointNames.getLanguages:
@@ -338,6 +291,6 @@ export const convertChangeToMeiliDocumentRequest = (
     case SDKEndpointNames.getCollectibleGalleryImage:
     case SDKEndpointNames.getChronologyEvents:
     default:
-      return undefined;
+      return [];
   }
 };

@@ -1,7 +1,4 @@
-import {
-  convertChangeToMeiliDocumentRequest,
-  getMeiliDocumentsFromRequest,
-} from "src/convert";
+import { convertEndpointChangeToMeiliDocuments } from "src/convert";
 import { meili } from "src/services";
 import { MeiliIndexes } from "src/shared/meilisearch/constants";
 import type { MeiliDocument } from "src/shared/meilisearch/types";
@@ -15,10 +12,7 @@ export const webhookHandler = async (changes: EndpointChange[]) => {
     await index.deleteDocuments({
       filter: `endpointCalled = "${change.url}"`,
     });
-
-    const meiliDocRequest = convertChangeToMeiliDocumentRequest(change);
-    if (!meiliDocRequest) continue;
-    documents.push(...(await getMeiliDocumentsFromRequest(meiliDocRequest)));
+    documents.push(...(await convertEndpointChangeToMeiliDocuments(change)));
   }
 
   console.log("[Webhook] Adding", documents.length, "documents to Meilisearch");
