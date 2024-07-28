@@ -1,6 +1,7 @@
 import { convertEndpointChangeToMeiliDocuments } from "src/convert";
 import { meili, payload } from "src/services";
 import { MeiliIndexes } from "src/shared/meilisearch/constants";
+import type { MeiliDocument } from "src/shared/meilisearch/types";
 
 export const synchronizeMeiliDocs = async () => {
   const version = await meili.getVersion();
@@ -31,9 +32,10 @@ export const synchronizeMeiliDocs = async () => {
 
   const allChanges = (await payload.getAll()).data;
 
-  const documents = (
-    await Promise.all(allChanges.map(convertEndpointChangeToMeiliDocuments))
-  ).flat();
+  const documents: MeiliDocument[] = [];
+  for (const change of allChanges) {
+    documents.push(...(await convertEndpointChangeToMeiliDocuments(change)));
+  }
 
   console.log("Adding", documents.length, "documents to Meilisearch");
 
