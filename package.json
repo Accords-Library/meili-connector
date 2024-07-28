@@ -12,8 +12,8 @@
     "meilisearch": "^0.41.0"
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
+    "@types/node": "^22.0.0",
     "tsx": "^4.16.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   }
 }
