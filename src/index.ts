@@ -3,7 +3,9 @@ import { synchronizeMeiliDocs } from "./synchro";
 import { webhookHandler } from "src/webhook";
 import type { EndpointChange } from "src/shared/payload/webhooks";
 
-await synchronizeMeiliDocs();
+if (process.env.REBUILD_ON_INIT === "true") {
+  await synchronizeMeiliDocs();
+}
 
 export const requestListener: http.RequestListener = async (req, res) => {
   if (req.method !== "POST") {
