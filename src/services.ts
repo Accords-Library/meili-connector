@@ -1,6 +1,4 @@
 import { MeiliSearch } from "meilisearch";
-import { DataCache } from "src/cache/dataCache";
-import { DocumentInvalidator } from "src/cache/documentCache";
 import { TokenCache } from "src/cache/tokenCache";
 import { PayloadSDK } from "src/shared/payload/sdk";
 
@@ -23,17 +21,3 @@ export const payload = new PayloadSDK(
   process.env.PAYLOAD_PASSWORD
 );
 payload.addTokenCache(tokenCache);
-
-export const uncachedPayload = new PayloadSDK(
-  process.env.PAYLOAD_API_URL,
-  process.env.PAYLOAD_USER,
-  process.env.PAYLOAD_PASSWORD
-);
-uncachedPayload.addTokenCache(tokenCache);
-
-const documentInvalidator = new DocumentInvalidator(meili);
-
-export const dataCache = new DataCache(payload, uncachedPayload, (urls) =>
-  documentInvalidator.invalidate(urls)
-);
-payload.addDataCache(dataCache);

@@ -1,10 +1,8 @@
 import http from "http";
 import { synchronizeMeiliDocs } from "./synchro";
-import type { AfterOperationWebHookMessage } from "src/shared/payload/webhooks";
 import { webhookHandler } from "src/webhook";
-import { dataCache } from "src/services";
+import type { EndpointChange } from "src/shared/payload/webhooks";
 
-await dataCache.init();
 await synchronizeMeiliDocs();
 
 export const requestListener: http.RequestListener = async (req, res) => {
@@ -25,7 +23,7 @@ export const requestListener: http.RequestListener = async (req, res) => {
   }
   const message = JSON.parse(
     Buffer.concat(buffers).toString()
-  ) as AfterOperationWebHookMessage;
+  ) as EndpointChange[];
 
   // Not awaiting on purpose to respond with a 202 and not block the CMS
   webhookHandler(message);

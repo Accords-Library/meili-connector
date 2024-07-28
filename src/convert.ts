@@ -19,7 +19,11 @@ import {
   formatInlineTitle,
   formatRichTextContentToString,
 } from "src/shared/payload/format";
-import type { PayloadSDKResponse } from "src/shared/payload/sdk";
+import {
+  SDKEndpointNames,
+  type PayloadSDKResponse,
+} from "src/shared/payload/sdk";
+import type { EndpointChange } from "src/shared/payload/webhooks";
 
 const convertPageToDocument = ({
   data,
@@ -261,27 +265,79 @@ export const getMeiliDocumentsFromRequest = async (
   switch (request.type) {
     case Collections.Audios:
       return convertAudioToDocument(await payload.getAudioByID(request.id));
+
     case Collections.ChronologyEvents:
       return convertChronologyEventToDocument(
         await payload.getChronologyEventByID(request.id)
       );
+
     case Collections.Collectibles:
       return convertCollectibleToDocument(
         await payload.getCollectible(request.slug)
       );
+
     case Collections.Files:
       return convertFileToDocument(await payload.getFileByID(request.id));
+
     case Collections.Folders:
       return convertFolderToDocument(await payload.getFolder(request.slug));
+
     case Collections.Images:
       return convertImageToDocument(await payload.getImageByID(request.id));
+
     case Collections.Pages:
       return convertPageToDocument(await payload.getPage(request.slug));
+
     case Collections.Recorders:
       return convertRecorderToDocument(
         await payload.getRecorderByID(request.id)
       );
     case Collections.Videos:
       return convertVideoToDocument(await payload.getVideoByID(request.id));
+  }
+};
+
+export const convertChangeToMeiliDocumentRequest = (
+  change: EndpointChange
+): MeiliDocumentRequest | undefined => {
+  switch (change.type) {
+    case SDKEndpointNames.getFolder:
+      return { type: Collections.Folders, slug: change.slug };
+
+    case SDKEndpointNames.getPage:
+      return { type: Collections.Pages, slug: change.slug };
+
+    case SDKEndpointNames.getCollectible:
+      return { type: Collections.Pages, slug: change.slug };
+
+    case SDKEndpointNames.getChronologyEventByID:
+      return { type: Collections.ChronologyEvents, id: change.id };
+
+    case SDKEndpointNames.getImageByID:
+      return { type: Collections.Images, id: change.id };
+
+    case SDKEndpointNames.getAudioByID:
+      return { type: Collections.Images, id: change.id };
+
+    case SDKEndpointNames.getVideoByID:
+      return { type: Collections.Images, id: change.id };
+
+    case SDKEndpointNames.getFileByID:
+      return { type: Collections.Images, id: change.id };
+
+    case SDKEndpointNames.getRecorderByID:
+      return { type: Collections.Images, id: change.id };
+
+    case SDKEndpointNames.getWebsiteConfig:
+    case SDKEndpointNames.getLanguages:
+    case SDKEndpointNames.getCurrencies:
+    case SDKEndpointNames.getWordings:
+    case SDKEndpointNames.getCollectibleScans:
+    case SDKEndpointNames.getCollectibleScanPage:
+    case SDKEndpointNames.getCollectibleGallery:
+    case SDKEndpointNames.getCollectibleGalleryImage:
+    case SDKEndpointNames.getChronologyEvents:
+    default:
+      return undefined;
   }
 };
